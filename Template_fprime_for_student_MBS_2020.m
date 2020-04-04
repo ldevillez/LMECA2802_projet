@@ -56,13 +56,13 @@ for i = data.n:1:-1
       Fc(:,i) = Wc(:,i);
       % 3.75
       % TODO: fix calcul inertie
-      Lc(:,i) = tilde(get_d(i,i)) * Wc(:,i) - data.Lext(:,i) + data.inertia_moments(:,i) .* omegadc(:,i) + tilde(omega(:,i)) * data.inertia_moments(:,i) .* omega(:,i) ;
+      Lc(:,i) = tilde(get_d(i,i)) * Wc(:,i) - data.Lext(:,i) + data.inertia(:,:,i) * omegadc(:,i) + tilde(omega(:,i)) * data.inertia(:,:,i) * omega(:,i) ;
    else
       % 3.74
       Fc(:,i) = sum_recursive_children(Fc,i) +  Wc(:,i);
       % 3.75
       % TODO: fix calcul inertie
-      Lc(:,i) = sum_recursive_children(Lc,i)+ sum_recursive_d_chilren(Fc,i) + tilde(get_d(i,i)) * Wc(:,i) - data.Lext(:,i) + data.inertia_moments(:,i) .* omegadc(:,i) + tilde(omega(:,i)) * data.inertia_moments(:,i) .* omega(:,i);
+      Lc(:,i) = sum_recursive_children(Lc,i)+ sum_recursive_d_chilren(Fc,i) + tilde(get_d(i,i)) * Wc(:,i) - data.Lext(:,i) + data.inertia(:,:,i) * omegadc(:,i) + tilde(omega(:,i)) * data.inertia(:,:,i) * omega(:,i);
    end
    
    for k = 1:i
@@ -71,7 +71,7 @@ for i = data.n:1:-1
         % 3.77
         Fm(:,i,k) = sum_recursive_children(Fm(:,:,k),i) + Wm(:,i,k);
         % 3.78
-        Lm(:,i,k) = sum_recursive_children(Lm(:,:,k),i) + sum_recursive_d_children(Fm(:,:,k),i) + tilde(get_d(i,i)) * W(:,i,k) + data.inertia_moments(:,i) .* O(:,i,k);
+        Lm(:,i,k) = sum_recursive_children(Lm(:,:,k),i) + sum_recursive_d_children(Fm(:,:,k),i) + tilde(get_d(i,i)) * W(:,i,k) + data.inertia(:,:,i) * O(:,i,k);
    end
 end
 
@@ -80,20 +80,16 @@ M = zeros(data.n,data.n);
 for i = 1:data.n
     c(i) = getPsi(data.joint_type(i))' * Fc(:,i) + getPhi(data.joint_type(i)) * Lc(:,i);
    for j = 1:i
-        M(i,j) = getPsi(data.joint_type(i))' * Fm(:,i,j) + getPhi(data.joint_type(i)) * Lm(:,i,j);;
+        M(i,j) = getPsi(data.joint_type(i))' * Fm(:,i,j) + getPhi(data.joint_type(i)) * Lm(:,i,j);
    end
 end
 
 
 % Q vector
 
-[Q] = Joint_forces(data.q, data.qd, data); % up to you : function 'Joint_forces' to program (if needed)
+% [Q] = Joint_forces(data.q, data.qd, data); % up to you : function 'Joint_forces' to program (if needed)
 
-% Mass matrix M and c term
-
-[M, c] = dirdyn(data.q, data.qd, data); % up to you : function 'dirdyn to program (NER method) <== MECA2802 :-)
-
-F = Q - c;
+F = - c;
 
 % Variable substitution (from  MBS to Integrator)
 
