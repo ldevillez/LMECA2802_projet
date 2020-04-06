@@ -4,7 +4,7 @@ function [t,y] = Template_main_for_student_MBS_2020(param_in)
 
     if nargin == 0
         param_in = 1; % If needed (input parameter(s))
-        tspan = linspace(0,2,200);
+        tspan = linspace(0,5,500);
     end
 
     global data % Global structure that contains all the data (data.m, data.d, data.g, ...)
@@ -32,10 +32,15 @@ function [t,y] = Template_main_for_student_MBS_2020(param_in)
     % Plot of results ...
 
     figure(1)
-    subplot(2,1,1)
-    plot(t, -y(:,1));grid on;title('q T3');hold on;
-    subplot(2,1,2)
-    plot(t, -y(:,2));grid on;title('qd T3');hold on;
+    subplot(2,2,1)
+    plot(t, y(:,1));grid on;title('q R2');hold on;
+    subplot(2,2,3)
+    plot(t, y(:,2));grid on;title('qd R2');hold on;
+    
+    subplot(2,2,2)
+    plot(t, y(:,3));grid on;title('q T3');hold on;
+    subplot(2,2,4)
+    plot(t, y(:,4));grid on;title('qd T3');hold on;
 
     % Happy end !
 
