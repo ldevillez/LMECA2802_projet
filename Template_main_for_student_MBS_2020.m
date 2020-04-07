@@ -1,15 +1,22 @@
-function [t,y] = Template_main_for_student_MBS_2020(param_in)
-
-    % Project Template (MECA2802 - 2020)
-
-    if nargin == 0
-        param_in = 1; % If needed (input parameter(s))
-        tspan = linspace(0,5,500);
-    end
+function [t,y] = Template_main_for_student_MBS_2020(varargin)
 
     global data % Global structure that contains all the data (data.m, data.d, data.g, ...)
 
     [data] = load_data(); % Loading of the data from the data file (up to you!)
+
+    switch nargin
+        case 0
+            tspan = 0:0.01:15;
+        case 1
+            tspan = varargin{1};
+            data.q = varargin{2};
+        case 2
+            tspan = varargin{1};
+            data.q = varargin{2};
+            data.qd = varargin{3};
+        otherwise
+            assert(false, 'Too many argument')
+    end
 
     % Initial conditions for the time simulation(q and qdot at t = 0 sec)
     % Example for a 3 dof MBS
@@ -31,16 +38,14 @@ function [t,y] = Template_main_for_student_MBS_2020(param_in)
 
     % Plot of results ...
 
-    figure(1)
-    subplot(2,2,1)
-    plot(t, y(:,1));grid on;title('q R2');hold on;
-    subplot(2,2,3)
-    plot(t, y(:,2));grid on;title('qd R2');hold on;
-    
-    subplot(2,2,2)
-    plot(t, y(:,3));grid on;title('q T3');hold on;
-    subplot(2,2,4)
-    plot(t, y(:,4));grid on;title('qd T3');hold on;
+    for j = 1:data.n
+        figure()
+        subplot(2,1,1)
+        plot(t, y(:,-1+2*j));grid on;title(['q ', num2str(j)]);hold on;
+        subplot(2,1,2)
+        plot(t, y(:,2*j));grid on;title(['qd «', num2str(j)]);hold on;
+    end
+
 
     % Happy end !
 

@@ -24,7 +24,7 @@ betac(:,:,1) = tilde(omegadc(:,1)) + tilde(omega(:,1)) * tilde(omega(:,1));
 
 % 3.61
 alphac = zeros(3, data.n);
-alphac(:,1) = -data.gravity + 2 * tilde(omega(:,1)) * getPsi(data.joint_type(1)) * data.qd(1);
+alphac(:,1) = - rot_mat(data.joint_type(1),data.q(1)) * data.gravity + 2 * tilde(omega(:,1)) * getPsi(data.joint_type(1)) * data.qd(1);
 
 % 3.62
 O = zeros(3, data.n, data.n);
@@ -37,13 +37,13 @@ A(:,1,1) = getPsi(data.joint_type(1));
 for i = 2:data.n
     h = data.in_body(i);
     % 3.58
-    omega(:,i) = omega(:,h) + getPhi(data.joint_type(i))*data.qd(i);
+    omega(:,i) = rot_mat(data.joint_type(i),data.q(i)) * omega(:,h) + getPhi(data.joint_type(i))*data.qd(i);
     % 3.59
-    omegadc(:,i) = omegadc(:,h) + tilde(omega(:,i)) * getPhi(data.joint_type(i))*data.qd(i);
+    omegadc(:,i) = rot_mat(data.joint_type(i),data.q(i)) * omegadc(:,h) + tilde(omega(:,i)) * getPhi(data.joint_type(i))*data.qd(i);
     % 3.60
     betac(:,:,i) = tilde(omegadc(:,i)) + tilde(omega(:,i)) * tilde(omega(:,i));
     % 3.61
-    alphac(:,i) = alphac(:,h) + betac(:,:,h) * get_d(h,i) + 2 * tilde(omega(:,i)) * getPsi (data.joint_type(i)) * data.qd(i);
+    alphac(:,i) = rot_mat(data.joint_type(i),data.q(i)) *( alphac(:,h) + betac(:,:,h) * get_d(h,i)) + 2 * tilde(omega(:,i)) * getPsi (data.joint_type(i)) * data.qd(i);
     for k = 1:i
         % 3.62
         O(:,i,k) = O(:,h,k) + (k == i)*getPhi(data.joint_type(i));
@@ -98,13 +98,7 @@ end
 % Q vector
 
 % [Q] = Joint_forces(data.q, data.qd, data); % up to you : function 'Joint_forces' to program (if needed)
-id = 2;
-K = 100;
-C = 2;
-L0 = 0.1;
-Q(id) = - ( K*(data.q(id)-L0) + C*data.qd(id) );
-
-
+[Q] = Joint_forces();
 
 F = Q - c;
 
@@ -113,7 +107,5 @@ F = Q - c;
 yp = zeros(2*data.n,1);
 yp(1:2:end) = y(2:2:end);
 yp(2:2:end) = M \F;
-%yp(1) = y(2);
-%yp(2) = M\F; % solution of linear system ("Ax = b")
 
 end

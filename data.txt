@@ -1,0 +1,34 @@
+=== NBODY ===
+2
+=== INBODY ===
+0 1
+=== JOINT TYPE ===
+2 6
+=== JOINT POSITIONS ===
+0 0 0
+0 0 0.5
+=== MASS CENTER ===
+0 0 0.4
+0 0 0
+=== MASS ===
+5 2
+=== INERTIA MOMENTS ===
+0 0.1 0
+0 0 0
+=== INERTIA PRODUCTS ===
+0 0 0
+0 0 0
+=== GRAVITY ===
+0 0 9.81
+=== Fext ===
+0 0 0
+0 0 0
+=== Lext ===
+0 0 0
+0 0 0
+=== Q QD ===
+1 0.2
+0 0
+=== JOINT FORCES ===
+1
+3 100 0.1 2
