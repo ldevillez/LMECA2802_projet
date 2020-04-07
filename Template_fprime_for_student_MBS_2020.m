@@ -43,12 +43,12 @@ for i = 2:data.n
     % 3.60
     betac(:,:,i) = tilde(omegadc(:,i)) + tilde(omega(:,i)) * tilde(omega(:,i));
     % 3.61
-    alphac(:,i) = rot_mat(data.joint_type(i),data.q(i)) *( alphac(:,h) + betac(:,:,h) * get_d(h,i)) + 2 * tilde(omega(:,i)) * getPsi (data.joint_type(i)) * data.qd(i);
+    alphac(:,i) = rot_mat(data.joint_type(i),data.q(i)) *( alphac(:,h) + betac(:,:,h) * get_d(h,i,data)) + 2 * tilde(omega(:,i)) * getPsi (data.joint_type(i)) * data.qd(i);
     for k = 1:i
         % 3.62
         O(:,i,k) = O(:,h,k) + (k == i)*getPhi(data.joint_type(i));
         % 3.63
-        A(:,i,k) = A(:,h,k) + tilde(O(:,h,k)) * get_d(h, i) + (k == i) * getPsi(data.joint_type(i));
+        A(:,i,k) = A(:,h,k) + tilde(O(:,h,k)) * get_d(h, i,data) + (k == i) * getPsi(data.joint_type(i));
     end
 end
 
@@ -61,22 +61,28 @@ Fm = zeros(3, data.n, data.n);
 Lm = zeros(3, data.n, data.n);
 
 for i = data.n:-1:1
+   % For better perf.
+   dii = get_d(i,i,data);
+   tdii = tilde(dii);
    % 3.73
-   Wc(:,i) = data.mass(i) * (alphac(:,i) + betac(:,i).*get_d(i,i)) - data.Fext(:,i);
+   Wc(:,i) = data.mass(i) * (alphac(:,i) + betac(:,i).*dii) - data.Fext(:,i);
    
   % 3.74
-  Fc(:,i) = sum_recursive_children(Fc,i) +  Wc(:,i);
+  Fc(:,i) = sum_recursive_children(Fc,i,data) +  Wc(:,i);
 
   % 3.75
-  Lc(:,i) = sum_recursive_children(Lc,i)+ sum_recursive_d_children(Fc,i) + tilde(get_d(i,i)) * Wc(:,i) - data.Lext(:,i) + data.inertia(:,:,i) * omegadc(:,i) + tilde(omega(:,i)) * data.inertia(:,:,i) * omega(:,i);
+  Lc(:,i) = sum_recursive_children(Lc,i,data)+ sum_recursive_d_children(Fc,i,data) + tdii * Wc(:,i) - data.Lext(:,i) + data.inertia(:,:,i) * omegadc(:,i) + tilde(omega(:,i)) * data.inertia(:,:,i) * omega(:,i);
    
    for k = 1:i
        % 3.76
-        Wm(:,i,k) = data.mass(i) * (A(:,i,k) + tilde(O(:,i,k)) * get_d(i,i));
+        Wm(:,i,k) = data.mass(i) * (A(:,i,k) + tilde(O(:,i,k)) * dii);
+        
+        % For better perf.
+        Ftmp = sum_recursive_children(Fm(:,:,k),i,data);
         % 3.77
-        Fm(:,i,k) = sum_recursive_children(Fm(:,:,k),i) + Wm(:,i,k);
+        Fm(:,i,k) = Ftmp + Wm(:,i,k);
         % 3.78
-        Lm(:,i,k) = sum_recursive_children(Lm(:,:,k),i) + sum_recursive_d_children(Fm(:,:,k),i) + tilde(get_d(i,i)) * Wm(:,i,k) + data.inertia(:,:,i) * O(:,i,k);
+        Lm(:,i,k) = sum_recursive_children(Lm(:,:,k),i,data) + Ftmp + tdii * Wm(:,i,k) + data.inertia(:,:,i) * O(:,i,k);
    end
 end
 
@@ -94,6 +100,8 @@ for i = 1:data.n
         M(i,j) = getPsi(data.joint_type(i))' * Fm(:,i,j) + getPhi(data.joint_type(i))' * Lm(:,i,j);
    end
 end
+M = M + tril(M,1)';
+
 
 % Q vector
 

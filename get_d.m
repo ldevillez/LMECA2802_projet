@@ -1,5 +1,4 @@
-function [d] = get_d(h,i)
-global data % global declaration required for the integrator (Matlab "limitation")
+function [d] = get_d(h,i,data)
     if h == i
         d = (data.mass_center(:,i) + getPsi(data.joint_type(i))*data.q(i));
     else

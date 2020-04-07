@@ -1,5 +1,4 @@
-function [vect] = sum_recursive_children(a,i)
-global data % global declaration required for the integrator (Matlab "limitation")
+function [vect] = sum_recursive_children(a,i,data)
 
 vect = [0;0;0];
 indices = find(data.in_body == i);

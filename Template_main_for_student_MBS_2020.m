@@ -1,5 +1,4 @@
 function [t,y] = Template_main_for_student_MBS_2020(varargin)
-
     global data % Global structure that contains all the data (data.m, data.d, data.g, ...)
 
     [data] = load_data(); % Loading of the data from the data file (up to you!)
@@ -18,14 +17,7 @@ function [t,y] = Template_main_for_student_MBS_2020(varargin)
             assert(false, 'Too many argument')
     end
 
-    % Initial conditions for the time simulation(q and qdot at t = 0 sec)
-    % Example for a 3 dof MBS
-
-    %data.q = [0.0; 0.0]; % funny values
-    %data.qd = [0.0; 0.0]; % ...
-
     % Variable substitution for an order-1 integrator (ode45)
-
     y0 = [data.q; data.qd];
 
 
@@ -33,24 +25,24 @@ function [t,y] = Template_main_for_student_MBS_2020(varargin)
     % Time integration
     % MBS model to be programmed in the external function :
     % yd = Template_fprime_for_student_MBS_2020(t,y)
-
+    tic();
     [t, y] = ode45('Template_fprime_for_student_MBS_2020', tspan, y0);
-
+    b = toc();
+    disp(['Temps d integration: ', num2str(b), ' sec'])
     % Plot of results ...
-
+    
     for j = 1:data.n
         figure()
         subplot(2,1,1)
         plot(t, y(:,-1+2*j));grid on;title(['q ', num2str(j)]);hold on;
         subplot(2,1,2)
-        plot(t, y(:,2*j));grid on;title(['qd «', num2str(j)]);hold on;
+        plot(t, y(:,2*j));grid on;title(['qd ', num2str(j)]);hold on;
     end
-
 
     % Happy end !
 
     %load handel;
-    % sound(y,Fs);
+    %sound(y,Fs);
 
     %
 end
